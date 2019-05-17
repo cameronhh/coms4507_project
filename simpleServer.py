@@ -1,9 +1,7 @@
 from flask import Flask, jsonify, request
 import requests
-import sys
 from challenges import puzzle
 
-import mysql.connector
 app = Flask(__name__)
 
 
