@@ -43,7 +43,7 @@ def generate_puzzle(difficulty):
         Returns dict with block_header and client_target, because
         client_target != block_target (obvs)
 
-        Returns { block_header : bytes, client_target : 256 bit long}
+        Returns block_header, 256-bit long
     '''
     #16-bit preimage for e.g.
     target = b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\f\0'
