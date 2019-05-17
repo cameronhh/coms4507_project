@@ -2,6 +2,7 @@ import random
 import struct
 import hashlib
 import random
+import codecs
 
 # todo:
     # add comments
@@ -94,8 +95,18 @@ def solve_puzzle(block_header, target_difficulty):
     return static_data + nonce
 
 
-header, target = generate_puzzle(1)
-client_header = solve_puzzle(header, target)
-result = validate_puzzle(client_header, target)
-print(result)
-print(_check_block_confirmation(client_header))
+if __name__=="__main__":
+    header, target = generate_puzzle(8)
+    #print(target)
+    print("HEADER 1" + str(header))
+    print("HEADER 2" + str(header.decode('utf-16').encode('utf-16')[2:]))
+
+    encoded4 = codecs.decode(header, 'utf-16')
+    print(encoded4)
+    decoded = codecs.encode(encoded4, 'utf-16')
+    print(decoded)
+
+    client_header = solve_puzzle(header, target)
+    result = validate_puzzle(client_header, target)
+    print(result)
+    print(_check_block_confirmation(client_header))
