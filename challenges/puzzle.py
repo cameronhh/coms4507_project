@@ -1,55 +1,47 @@
 import random
 import struct
 import hashlib
-import random
-import codecs
 
 # todo:
     # add comments
-    # one small line to incorporate challenge difficulty
     # save a block header with a client session (flask)
     # time counter in flask for incrementing timestamp on blocks
-    # clean up
 
-
-def _convert_bytes_to_long(hash):
-    return int.from_bytes(hash, byteorder='little', signed=False)
+def _convert_bytes_to_long(some_bytes):
+    return int.from_bytes(some_bytes, byteorder='little', signed=False)
 
 def get_block():
-    ''' Returns the current block the server is working on, as bytes.
+    ''' Returns the current BLOCK_HEADER the server is 'working on', as bytes.
         Last 4 bytes are the nonce
     '''
     # mock block header, values for version_num, prev_header, root_hash, target,
-    # timestamp are all constant (as far as the requesting in client is concerned)
+    # timestamp are all immutable by the client (else validation will fail)
+    # timestamp unique for each client until a new block header is retrieved
+    # from a 'full node'
 
-    ### 18b
+    ### 18B
     version_num = 0xFF
     prev_header = 0x3e18ba72 # shortened for simplicity
     root_hash = 0x996d90de # as above
+    block_target = 2**(128) - 1 # arbitrarily small
+    block_target = block_target.to_bytes(block_target.bit_length(), byteorder='little', signed=False)
 
-    block_target = b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\f\0\0' # not used by client, but needs to be given to the client to make work useful
-
-    ### 8b
-    timestamp = 1 # have current 'time' counter in server and just add 1 every time
+    ### 8B
+    timestamp = 1
     nonce = 0xFFFF
 
     block_header = struct.pack('<hqq', version_num, prev_header, root_hash) + block_target + struct.pack('ii', timestamp, nonce)
     return block_header
 
 def generate_puzzle(difficulty):
-    ''' Generates a puzzle for a given difficulty.
-        Assumption that APIs have discrete request difficulty.
-        (Or some assigned, discrete difficulty for continuous values.)
-        Returns dict with block_header and client_target, because
-        client_target != block_target (obvs)
+    ''' input: difficulty is an integer 'n', such that the CLIENT_TARGET will
+        require finding a n-bit pre-image to solve.
 
-        Returns block_header, 256-bit long
+        return: a BLOCK_HEADER (type=bytes), as returned by get_block(), and
+        the CLIENT_TARGET (type=256 bit int) (referred to as 'Tcp' in the report).
     '''
-    #16-bit preimage for e.g.
-    target = b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\f\0'
-    target = _convert_bytes_to_long(target)
-
-    return get_block(), target
+    client_target = 2**(256-difficulty) - 1
+    return get_block(), client_target
 
 def validate_puzzle(block_header, target):
     ''' Checks that the returned block header is valid, and
@@ -95,18 +87,9 @@ def solve_puzzle(block_header, target_difficulty):
     return static_data + nonce
 
 
-if __name__=="__main__":
-    header, target = generate_puzzle(8)
-    #print(target)
-    print("HEADER 1" + str(header))
-    print("HEADER 2" + str(header.decode('utf-16').encode('utf-16')[2:]))
-
-    encoded4 = codecs.decode(header, 'utf-16')
-    print(encoded4)
-    decoded = codecs.encode(encoded4, 'utf-16')
-    print(decoded)
-
-    client_header = solve_puzzle(header, target)
-    result = validate_puzzle(client_header, target)
-    print(result)
-    print(_check_block_confirmation(client_header))
+# #usage:
+# header, target = generate_puzzle(2)
+# client_header = solve_puzzle(header, target)
+# result = validate_puzzle(client_header, target)
+# print(result)
+# print(_check_block_confirmation(client_header))
