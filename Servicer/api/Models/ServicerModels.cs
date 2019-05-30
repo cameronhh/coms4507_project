@@ -16,10 +16,15 @@ namespace Servicer.Models
     {
         public string RequestId { get; set; }
         public string TransactionId { get; set; }
-        public NewTaskResponse(string id, string transactionId)
+        public string Header { get; set; }
+        public string Target { get; set; }
+
+        public NewTaskResponse(string id, string transactionId, string header, string target)
         {
             this.RequestId = id;
             this.TransactionId = transactionId;
+            this.Header = header;
+            this.Target = target;
         }
     }
 
@@ -27,12 +32,15 @@ namespace Servicer.Models
     public class RunTaskRequest
     {
         public string RequestId { get; set; }
+        public string Header { get; set; }
+        public string Target { get; set; }
     }
 
     [Serializable]
     public class RunTaskResponse
     {
         public bool Result { get; set; }
+
         public RunTaskResponse(bool result)
         {
             this.Result = result;
@@ -43,6 +51,19 @@ namespace Servicer.Models
     public class NewTransactionResponse
     {
         public string TransactionId { get; set; }
+    }
+
+    [Serializable]
+    public class NewChallengeResponse
+    {
+        public string Header { get; set; }
+        public string Target { get; set; }
+    }
+
+    [Serializable]
+    public class ChallengeStatusResponse
+    {
+        public bool Access { get; set; }
     }
 
     [Serializable]

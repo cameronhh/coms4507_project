@@ -39,15 +39,18 @@ namespace Servicer.Controllers
             var client = getCacheClient();
 
             var requestId = RandomGenerator.GenerateToken();
-            var postContent = new
+            var postMerchantContent = new
             {
                 price = REQUEST_PRICE
             };
 
-            var postResponse = await HttpHelper.PostToMerchantAsync("/api/transaction/new", postContent);
-            NewTransactionResponse result = JsonConvert.DeserializeObject<NewTransactionResponse>(postResponse);
+            var postMerchantResponse = HttpHelper.PostToMerchantAsync("/api/transaction/new", postMerchantContent);
+            var getChallengeResponse = HttpHelper.GetFromChallengeAsync("/ChallengeMe");
 
-            var requestDetails = new RequestDetails(requestId, result.TransactionId, request.Method);
+            NewTransactionResponse merchantResult = JsonConvert.DeserializeObject<NewTransactionResponse>(await postMerchantResponse);
+            NewChallengeResponse challengeResult = JsonConvert.DeserializeObject<NewChallengeResponse>(await getChallengeResponse);
+
+            var requestDetails = new RequestDetails(requestId, merchantResult.TransactionId, request.Method);
 
             var ttl = RandomGenerator.GenerateTTL();
             var added = client.Add(REQUEST_PREFIX + requestId, requestDetails, ttl);
@@ -56,7 +59,7 @@ namespace Servicer.Controllers
                 return BadRequest("Cache error");
             }
 
-            var response = new NewTaskResponse(requestId, result.TransactionId);
+            var response = new NewTaskResponse(requestId, merchantResult.TransactionId, challengeResult.Header, challengeResult.Target);
 
             return Ok(response);
         }
@@ -65,6 +68,29 @@ namespace Servicer.Controllers
         [HttpPost("runtask")]
         public async Task<IActionResult> RunTask([FromBody] RunTaskRequest request)
         {
+            /* Handle an included challenge */
+            if (request.Header != null)
+            {
+
+                var postChallengeContent = new
+                {
+                    header = request.Header,
+                    target = request.Target
+                };
+
+                var postChallengeResponse = await HttpHelper.PostToChallengeAsync("/", postChallengeContent);
+                ChallengeStatusResponse challengeResponse = JsonConvert.DeserializeObject<ChallengeStatusResponse>(postChallengeResponse);
+
+                if (!challengeResponse.Access)
+                {
+                    return BadRequest("Invalid solution proivded");
+                }
+
+                var challengeExecutionResult = executeTask("executable");
+                var challengeExecutionResponse = new RunTaskResponse(challengeExecutionResult);
+                return Ok(challengeExecutionResponse);
+            }
+
             var client = getCacheClient();
 
             RequestDetails requestDetails = client.Get<RequestDetails>(REQUEST_PREFIX + request.RequestId);
@@ -73,15 +99,15 @@ namespace Servicer.Controllers
                 return NotFound("Invalid request details");
             }
 
-            var postContent = new
+            var postMerchantContent = new
             {
                 transactionId = requestDetails.TransactionId
             };
 
-            var postResponse = await HttpHelper.PostToMerchantAsync("/api/transaction/status", postContent);
-            StatusResponse result = JsonConvert.DeserializeObject<StatusResponse>(postResponse);
+            var postMerchantResponse = await HttpHelper.PostToMerchantAsync("/api/transaction/status", postMerchantContent);
+            StatusResponse merchantResult = JsonConvert.DeserializeObject<StatusResponse>(postMerchantResponse);
 
-            if (result.AmountPaid < result.Amount)
+            if (merchantResult.AmountPaid < merchantResult.Amount)
             {
                 return BadRequest("Payment not completed");
             }
