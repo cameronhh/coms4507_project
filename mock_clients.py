@@ -47,14 +47,13 @@ def sum_queue(n_processes, que):
     return a, b
 
 if __name__ == '__main__':
-    print('hello')
-    n_req = 100
+    n_req = 100 # requests per process
     result_queue = Queue()
-
     start_time = time.time()
+    n_processes = 16
 
     job_list = []
-    for i in range(16):
+    for i in range(n_processes):
         new_proc = Process(target=client_worker, args=(result_queue, n_req))
         new_proc.daemon = True
         new_proc.start()
@@ -65,7 +64,7 @@ if __name__ == '__main__':
 
     end_time = time.time()
 
-    puzzle_success_count, block_success_count = sum_queue(16, result_queue)
+    puzzle_success_count, block_success_count = sum_queue(n_processes, result_queue)
 
     print('n requests: %d' % n_req)
     print('n puzzles solved: %d' % puzzle_success_count)
