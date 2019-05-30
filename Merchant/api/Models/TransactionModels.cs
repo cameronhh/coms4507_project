@@ -9,6 +9,7 @@ namespace Merchant.Models
     public class DummyPayRequest
     {
         public string TransactionId { get; set; }
+        public string Receipt { get; set; }
         public decimal Amount { get; set; }
     }
 
@@ -31,7 +32,6 @@ namespace Merchant.Models
     public class StatusRequest
     {
         public string TransactionId { get; set; }
-        public string Receipt { get; set; }
     }
 
     [Serializable]
@@ -54,7 +54,6 @@ namespace Merchant.Models
     [Serializable]
     public class NewTransactionRequest
     {
-        public string RequestId { get; set; }
         public decimal Price { get; set; }
     }
 
@@ -73,13 +72,11 @@ namespace Merchant.Models
     public class NewTransactionDetails
     {
         public string TransactionId { get; set; }
-        public string RequestId { get; set; }
         public decimal Price { get; set; }
 
-        public NewTransactionDetails(string id, string requestId, decimal price)
+        public NewTransactionDetails(string id, decimal price)
         {
             this.TransactionId = id;
-            this.RequestId = requestId;
             this.Price = price;
         }
     }
@@ -108,20 +105,5 @@ namespace Merchant.Models
     {
         public string TransactionId { get; set; }
         public string Currency { get; set; }
-    }
-
-    [Serializable]
-    public class TransactionRequest
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-
-        public TransactionRequest(string id, string name, decimal price)
-        {
-            this.Id = id;
-            this.Name = name;
-            this.Price = price;
-        }
     }
 }

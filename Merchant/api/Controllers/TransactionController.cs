@@ -15,10 +15,11 @@ namespace Merchant.Controllers
     [ApiController]
     public class TransactionController : ControllerBase
     {
-        private const string TRANSACTION_PREFIX = "transaction_";
-        private const string NEW_REQUEST_PREFIX = "request_";
-        private const string DUMMY_PAY_PREFIX = "dummypay_";
         private const string CURRENCY_BTC = "BTC";
+        private const string API_PREFIX = "merchant_";
+        private const string TRANSACTION_PREFIX = API_PREFIX + "transaction_";
+        private const string NEW_REQUEST_PREFIX = API_PREFIX + "request_";
+        private const string DUMMY_PAY_PREFIX = API_PREFIX + "dummypay_";
 
         private ICacheClient getCacheClient()
         {
@@ -39,7 +40,7 @@ namespace Merchant.Controllers
             var client = getCacheClient();
 
             var transactionId = RandomGenerator.GenerateToken();
-            var newTransactionDetails = new NewTransactionDetails(transactionId, request.RequestId, request.Price);
+            var newTransactionDetails = new NewTransactionDetails(transactionId, request.Price);
 
             var ttl = RandomGenerator.GenerateTTL();
             var added = client.Add(NEW_REQUEST_PREFIX + transactionId, newTransactionDetails, ttl);
@@ -98,6 +99,10 @@ namespace Merchant.Controllers
                 return NotFound("Invalid request details");
             }
 
+            if (request.Receipt != transactionDetails.Receipt)
+            {
+                return BadRequest("Invalid receipt");
+            }
 
             var dummyPayId = RandomGenerator.GenerateToken();
             var newDummyPay = new DummyPayDetails(dummyPayId, transactionDetails.TransactionId, request.Amount);
@@ -122,11 +127,6 @@ namespace Merchant.Controllers
             if (transactionDetails == null)
             {
                 return NotFound("Invalid request details");
-            }
-
-            if (request.Receipt != transactionDetails.Receipt)
-            {
-                return BadRequest("Invalid receipt");
             }
 
             var totalPayment = GetCurrentlyPaidAmount(transactionDetails.TransactionId);
