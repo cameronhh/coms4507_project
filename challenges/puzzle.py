@@ -23,11 +23,11 @@ def get_block():
     version_num = 0xFF
     prev_header = 0x3e18ba72 # shortened for simplicity
     root_hash = 0x996d90de # as above
-    block_target = 2**(128) - 1 # arbitrarily small
+    block_target = 2**(240) - 1 # arbitrarily small
     block_target = block_target.to_bytes(block_target.bit_length(), byteorder='little', signed=False)
 
     ### 8B
-    timestamp = 1
+    timestamp = random.randint(0, 16192)
     nonce = 0xFFFF
 
     block_header = struct.pack('<hqq', version_num, prev_header, root_hash) + block_target + struct.pack('ii', timestamp, nonce)
@@ -87,9 +87,9 @@ def solve_puzzle(block_header, target_difficulty):
     return static_data + nonce
 
 
-# #usage:
-# header, target = generate_puzzle(2)
-# client_header = solve_puzzle(header, target)
-# result = validate_puzzle(client_header, target)
-# print(result)
-# print(_check_block_confirmation(client_header))
+#usage:
+header, target = generate_puzzle(21)
+client_header = solve_puzzle(header, target)
+result = validate_puzzle(client_header, target)
+print(result)
+print(_check_block_confirmation(client_header))

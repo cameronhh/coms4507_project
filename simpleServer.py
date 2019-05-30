@@ -4,8 +4,6 @@ from challenges import puzzle
 
 app = Flask(__name__)
 
-
-
 @app.route('/ChallengeMe')
 def getChallenge():
 	# generate challenge
@@ -33,10 +31,13 @@ def getData():
 	# puzzle_id = request.get_json()['id']
 	# validate the puzzle
 	result = puzzle.validate_puzzle(check_header, target)
-	print(result)
+	print('valid puzzle solution received == ' + str(result))
+	block_conf_result = puzzle._check_block_confirmation(check_header)
+	print('puzzle solution is valid block header == ' + str(block_conf_result))
 
 	return jsonify({
-		'access' : result
+		'access' : result,
+		'block_conf' : block_conf_result # for evaluation only
 	})
 
 # Start app
