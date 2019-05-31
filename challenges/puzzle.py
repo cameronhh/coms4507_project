@@ -1,6 +1,7 @@
 import random
 import struct
 import hashlib
+import base64
 
 # todo:
     # add comments
@@ -23,7 +24,7 @@ def get_block():
     version_num = 0xFF
     prev_header = 0x3e18ba72 # shortened for simplicity
     root_hash = 0x996d90de # as above
-    block_target = 2**(240) - 1 # arbitrarily small
+    block_target = 2**(236) - 1 # arbitrarily small
     block_target = block_target.to_bytes(block_target.bit_length(), byteorder='little', signed=False)
 
     ### 8B

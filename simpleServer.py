@@ -1,14 +1,16 @@
 from flask import Flask, jsonify, request
 import requests
 from challenges import puzzle
+import base64
 
 app = Flask(__name__)
 
 @app.route('/ChallengeMe')
 def getChallenge():
 	# generate challenge
-	header, target = puzzle.generate_puzzle(8)
-	header_str=header.decode('utf-16')
+	header, target = puzzle.generate_puzzle(16)
+	#header_str=header.decode('utf-16')
+	header_str= base64.b64encode(header).decode('utf-16')
 
 	#store this challenge and an id
 
@@ -26,7 +28,9 @@ def getData():
 	#DEBUG print( request.get_json()['header'].encode('utf-16')[2:] )
 	
 	# pull puzzle info from request
-	check_header = request.get_json()['header'].encode('utf-16')[2:]
+	#check_header = request.get_json()['header'].encode('utf-16')[2:]
+	check_header = base64.b64decode(request.get_json()['header'].encode('utf-16')[2:])
+		
 	target = request.get_json()['target']
 	# puzzle_id = request.get_json()['id']
 	# validate the puzzle
@@ -37,7 +41,7 @@ def getData():
 
 	return jsonify({
 		'access' : result,
-		'block_conf' : block_conf_result # for evaluation only
+		'block_conf' : block_conf_result # for evaluation
 	})
 
 # Start app

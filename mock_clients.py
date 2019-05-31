@@ -2,16 +2,19 @@ from challenges import puzzle
 import requests
 from multiprocessing import Process, Queue
 import time
+import base64
 
 def make_request():
     print('requesting a challenge')
     r = requests.get('http://127.0.0.1:5000/ChallengeMe', json={"key": "value"})
     json = r.json()
-    header = json['header'].encode('utf-16')[2:]
+    #header = json['header'].encode('utf-16')[2:]
+    header = base64.b64decode(json['header'].encode('utf-16')[2:])
     target = json['target']
     #puzzle_id = json['id']
     print('received a puzzle')
-    new_header = puzzle.solve_puzzle(header, target).decode('utf-16')
+    #new_header = puzzle.solve_puzzle(header, target).decode('base64')
+    new_header = base64.b64encode(puzzle.solve_puzzle(header, target)).decode('utf-16')
     print('solved the puzzle, sending to server')
     r = requests.get('http://127.0.0.1:5000/', 
         json = {
@@ -47,7 +50,7 @@ def sum_queue(n_processes, que):
     return a, b
 
 if __name__ == '__main__':
-    n_req = 100 # requests per process
+    n_req = 10 # requests per process
     result_queue = Queue()
     start_time = time.time()
     n_processes = 16
