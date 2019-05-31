@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 
 
-@app.route('/ChallengeMe')
+@app.route('/ChallengeMe', methods=['GET', 'POST'])
 def getChallenge():
 	# generate challenge
 	header, target = puzzle.generate_puzzle(8)
@@ -22,7 +22,7 @@ def getChallenge():
 	})
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def getData():
 	#DEBUG print(request.get_json())
 	#DEBUG print( request.get_json()['header'].encode('utf-16')[2:] )
