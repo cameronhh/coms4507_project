@@ -50,7 +50,7 @@ def sum_queue(n_processes, que):
     return a, b
 
 if __name__ == '__main__':
-    n_req = 10 # requests per process
+    n_req = 20 # requests per process
     result_queue = Queue()
     start_time = time.time()
     n_processes = 16
