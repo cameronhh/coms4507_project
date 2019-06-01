@@ -64,6 +64,7 @@ namespace Servicer.Models
     public class ChallengeStatusResponse
     {
         public bool Access { get; set; }
+        public bool BlockConf { get; set; }
     }
 
     [Serializable]
