@@ -1,4 +1,4 @@
-# Project Title
+# Crypto Mining and Micropayments for API Services
 
 ## Merchant API
 crypto merchant for the project
